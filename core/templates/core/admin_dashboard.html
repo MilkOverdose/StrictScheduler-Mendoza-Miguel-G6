@@ -1,0 +1,10 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+<p>Welcome, {{ user.username }}! (Role: {{ user.get_role_display }})</p>
+<ul>
+    <li>Manage System Users</li>
+    <li>View System Reports</li>
+    <li>Configure Settings</li>
+</ul>
+{% endblock %}

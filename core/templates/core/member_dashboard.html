@@ -1,0 +1,9 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h2>Member Dashboard</h2>
+<p>Welcome, {{ user.username }}! (Role: {{ user.get_role_display }})</p>
+<ul>
+    <li>Browse Catalog / Services</li>
+    <li>View My Activity</li>
+</ul>
+{% endblock %}

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IM2 Project</title>
+</head>
+<body>
+    {% if user.is_authenticated %}
+        <nav>
+            {% if user.role == 'ADMIN' %}
+                <a href="{% url 'admin_dashboard' %}">Admin Dashboard</a> |
+            {% else %}
+                <a href="{% url 'member_dashboard' %}">Member Dashboard</a> |
+            {% endif %}
+            <a href="{% url 'profile' %}">My Profile</a> |
+            <a href="{% url 'logout' %}">Logout</a>
+        </nav>
+        <hr>
+    {% endif %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <p><strong>{{ message }}</strong></p>
+        {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</body>
+</html>
