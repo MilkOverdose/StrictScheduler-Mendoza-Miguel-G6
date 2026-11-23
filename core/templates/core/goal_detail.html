@@ -1,0 +1,51 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h2>{{ goal.title }} — Schedule</h2>
+<p>
+  <strong>Category:</strong> {{ goal.get_category_display }} |
+  <strong>Target Date:</strong> {{ goal.target_date }} |
+  <strong>Status:</strong> {{ goal.get_status_display }}
+</p>
+{% if goal.description %}
+  <p>{{ goal.description }}</p>
+{% endif %}
+
+<p>
+  <a href="{% url 'routine_create' %}">+ Add Routine</a> |
+  <a href="{% url 'goal_update' goal.pk %}">Edit Goal</a> |
+  <a href="{% url 'goal_list' %}">&larr; Back to Goals</a>
+</p>
+
+<h3>Daily Routine Schedule (Earliest to Latest)</h3>
+{% if routines %}
+  <table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Time Slot</th>
+        <th>Routine</th>
+        <th>Frequency</th>
+        <th>Status</th>
+        <th>Notes</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for routine in routines %}
+      <tr>
+        <td><strong>{{ routine.start_time|time:"g:i A" }} – {{ routine.end_time|time:"g:i A" }}</strong></td>
+        <td>{{ routine.title }}</td>
+        <td>{{ routine.get_frequency_display }}</td>
+        <td>{% if routine.is_active %}Active{% else %}Inactive{% endif %}</td>
+        <td>{{ routine.notes|default:"—" }}</td>
+        <td>
+          <a href="{% url 'routine_update' routine.pk %}">Edit</a> |
+          <a href="{% url 'routine_delete' routine.pk %}">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No routines scheduled for this goal yet. <a href="{% url 'routine_create' %}">Add one now</a>.</p>
+{% endif %}
+{% endblock %}

@@ -68,7 +68,7 @@ def profile_view(request):
         form = ProfileUpdateForm(instance=request.user)
     return render(request, 'core/profile.html', {'form': form})
 
-    def is_admin_user(user):
+def is_admin_user(user):
     role = str(getattr(user, 'role', '')).upper()
     return user.is_superuser or user.is_staff or role == 'ADMIN'
 
@@ -82,6 +82,20 @@ def goal_list(request):
     else:
         goals = Goal.objects.filter(user=request.user).prefetch_related('routines')
     return render(request, 'core/goal_list.html', {'goals': goals, 'is_admin': is_admin_user(request.user)})
+
+@login_required
+def goal_detail(request, pk):
+    if is_admin_user(request.user):
+        goal = get_object_or_404(Goal, pk=pk)
+    else:
+        goal = get_object_or_404(Goal, pk=pk, user=request.user)
+    routines = goal.routines.all().order_by('start_time')
+    return render(request, 'core/goal_detail.html', {
+        'goal': goal,
+        'routines': routines,
+        'is_admin': is_admin_user(request.user),
+    })
+
 
 
 @login_required

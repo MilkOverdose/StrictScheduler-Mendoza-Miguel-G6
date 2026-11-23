@@ -38,5 +38,7 @@ urlpatterns = [
     path('routines/create/', views.routine_create, name='routine_create'),
     path('routines/<int:pk>/edit/', views.routine_update, name='routine_update'),
     path('routines/<int:pk>/delete/', views.routine_delete, name='routine_delete'),
+    path('goals/<int:pk>/', views.goal_detail, name='goal_detail'),
+
 
 ]
