@@ -1,0 +1,10 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h2>{{ action }}</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Save Goal</button>
+  <a href="{% url 'goal_list' %}">Cancel</a>
+</form>
+{% endblock %}

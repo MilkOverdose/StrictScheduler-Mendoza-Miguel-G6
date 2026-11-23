@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h2>{% if is_admin %}All Users' Routines{% else %}My Routines{% endif %}</h2>
+<p>
+  <a href="{% url 'routine_create' %}">+ New Routine</a> |
+  <a href="{% url 'goal_list' %}">View Goals</a>
+</p>
+
+{% if routines %}
+  <table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+      <tr>
+        {% if is_admin %}<th>User</th>{% endif %}
+        <th>Routine</th>
+        <th>Linked Goal</th>
+        <th>Frequency</th>
+        <th>Time Slot</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for routine in routines %}
+      <tr>
+        {% if is_admin %}<td>{{ routine.user.username }}</td>{% endif %}
+        <td><strong>{{ routine.title }}</strong><br><small>{{ routine.notes }}</small></td>
+        <td>{{ routine.goal.title }}</td>
+        <td>{{ routine.get_frequency_display }}</td>
+        <td>{{ routine.start_time|time:"H:i" }} – {{ routine.end_time|time:"H:i" }}</td>
+        <td>{% if routine.is_active %}Active{% else %}Inactive{% endif %}</td>
+        <td>
+          <a href="{% url 'routine_update' routine.pk %}">Edit</a> |
+          <a href="{% url 'routine_delete' routine.pk %}">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No routines found yet. <a href="{% url 'routine_create' %}">Create your first routine</a>.</p>
+{% endif %}
+{% endblock %}
