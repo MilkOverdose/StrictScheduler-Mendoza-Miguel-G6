@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
@@ -6,6 +6,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import RegisterForm, ProfileUpdateForm
+from .models import Goal, Routine
+from .forms import GoalForm, RoutineForm
 
 def register_view(request):
     if request.method == 'POST':
@@ -65,3 +67,133 @@ def profile_view(request):
     else:
         form = ProfileUpdateForm(instance=request.user)
     return render(request, 'core/profile.html', {'form': form})
+
+    def is_admin_user(user):
+    role = str(getattr(user, 'role', '')).upper()
+    return user.is_superuser or user.is_staff or role == 'ADMIN'
+
+
+# ================= GOAL CRUD =================
+
+@login_required
+def goal_list(request):
+    if is_admin_user(request.user):
+        goals = Goal.objects.select_related('user').prefetch_related('routines').all()
+    else:
+        goals = Goal.objects.filter(user=request.user).prefetch_related('routines')
+    return render(request, 'core/goal_list.html', {'goals': goals, 'is_admin': is_admin_user(request.user)})
+
+
+@login_required
+def goal_create(request):
+    if request.method == 'POST':
+        form = GoalForm(request.POST)
+        if form.is_valid():
+            goal = form.save(commit=False)
+            goal.user = request.user
+            goal.save()
+            messages.success(request, "Goal created successfully!")
+            return redirect('goal_list')
+        messages.error(request, "Please correct the errors below.")
+    else:
+        form = GoalForm()
+    return render(request, 'core/goal_form.html', {'form': form, 'action': 'Create Goal'})
+
+
+@login_required
+def goal_update(request, pk):
+    if is_admin_user(request.user):
+        goal = get_object_or_404(Goal, pk=pk)
+    else:
+        goal = get_object_or_404(Goal, pk=pk, user=request.user)
+
+    if request.method == 'POST':
+        form = GoalForm(request.POST, instance=goal)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Goal updated successfully!")
+            return redirect('goal_list')
+        messages.error(request, "Please correct the errors below.")
+    else:
+        form = GoalForm(instance=goal)
+    return render(request, 'core/goal_form.html', {'form': form, 'action': 'Edit Goal'})
+
+
+@login_required
+def goal_delete(request, pk):
+    if is_admin_user(request.user):
+        goal = get_object_or_404(Goal, pk=pk)
+    else:
+        goal = get_object_or_404(Goal, pk=pk, user=request.user)
+
+    if request.method == 'POST':
+        goal.delete()
+        messages.success(request, "Goal and its linked routines deleted.")
+        return redirect('goal_list')
+    return render(request, 'core/confirm_delete.html', {'object': goal, 'type': 'Goal', 'cancel_url': 'goal_list'})
+
+
+# ================= ROUTINE CRUD =================
+
+@login_required
+def routine_list(request):
+    if is_admin_user(request.user):
+        routines = Routine.objects.select_related('user', 'goal').all()
+    else:
+        routines = Routine.objects.filter(user=request.user).select_related('goal')
+    return render(request, 'core/routine_list.html', {'routines': routines, 'is_admin': is_admin_user(request.user)})
+
+
+@login_required
+def routine_create(request):
+    if not Goal.objects.filter(user=request.user).exists():
+        messages.error(request, "Create a Goal first before adding a Routine.")
+        return redirect('goal_create')
+
+    if request.method == 'POST':
+        form = RoutineForm(request.POST, user=request.user)
+        if form.is_valid():
+            routine = form.save(commit=False)
+            routine.user = request.user
+            routine.save()
+            messages.success(request, "Routine created successfully!")
+            return redirect('routine_list')
+        messages.error(request, "Please correct the errors below.")
+    else:
+        form = RoutineForm(user=request.user)
+    return render(request, 'core/routine_form.html', {'form': form, 'action': 'Create Routine'})
+
+
+@login_required
+def routine_update(request, pk):
+    if is_admin_user(request.user):
+        routine = get_object_or_404(Routine, pk=pk)
+        form_user = routine.user
+    else:
+        routine = get_object_or_404(Routine, pk=pk, user=request.user)
+        form_user = request.user
+
+    if request.method == 'POST':
+        form = RoutineForm(request.POST, instance=routine, user=form_user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Routine updated successfully!")
+            return redirect('routine_list')
+        messages.error(request, "Please correct the errors below.")
+    else:
+        form = RoutineForm(instance=routine, user=form_user)
+    return render(request, 'core/routine_form.html', {'form': form, 'action': 'Edit Routine'})
+
+
+@login_required
+def routine_delete(request, pk):
+    if is_admin_user(request.user):
+        routine = get_object_or_404(Routine, pk=pk)
+    else:
+        routine = get_object_or_404(Routine, pk=pk, user=request.user)
+
+    if request.method == 'POST':
+        routine.delete()
+        messages.success(request, "Routine deleted successfully!")
+        return redirect('routine_list')
+    return render(request, 'core/confirm_delete.html', {'object': routine, 'type': 'Routine', 'cancel_url': 'routine_list'})

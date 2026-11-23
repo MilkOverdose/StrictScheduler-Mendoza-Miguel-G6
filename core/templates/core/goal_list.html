@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h2>{% if is_admin %}All Users' Goals{% else %}My Goals{% endif %}</h2>
+<p>
+  <a href="{% url 'goal_create' %}">+ New Goal</a> |
+  <a href="{% url 'routine_list' %}">View Routines</a>
+</p>
+
+{% if goals %}
+  <table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+      <tr>
+        {% if is_admin %}<th>User</th>{% endif %}
+        <th>Title</th>
+        <th>Category</th>
+        <th>Target Date</th>
+        <th>Status</th>
+        <th>Routines</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for goal in goals %}
+      <tr>
+        {% if is_admin %}<td>{{ goal.user.username }}</td>{% endif %}
+        <td><strong>{{ goal.title }}</strong><br><small>{{ goal.description }}</small></td>
+        <td>{{ goal.get_category_display }}</td>
+        <td>{{ goal.target_date }}</td>
+        <td>{{ goal.get_status_display }}</td>
+        <td>{{ goal.routines.count }}</td>
+        <td>
+          <a href="{% url 'goal_update' goal.pk %}">Edit</a> |
+          <a href="{% url 'goal_delete' goal.pk %}">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No goals found yet. <a href="{% url 'goal_create' %}">Create your first goal</a>.</p>
+{% endif %}
+{% endblock %}

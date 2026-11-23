@@ -26,4 +26,17 @@ urlpatterns = [
     path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),
     path('dashboard/member/', views.member_dashboard, name='member_dashboard'),
     path('profile/', views.profile_view, name='profile'),
+
+        # Goals
+    path('goals/', views.goal_list, name='goal_list'),
+    path('goals/create/', views.goal_create, name='goal_create'),
+    path('goals/<int:pk>/edit/', views.goal_update, name='goal_update'),
+    path('goals/<int:pk>/delete/', views.goal_delete, name='goal_delete'),
+
+    # Routines
+    path('routines/', views.routine_list, name='routine_list'),
+    path('routines/create/', views.routine_create, name='routine_create'),
+    path('routines/<int:pk>/edit/', views.routine_update, name='routine_update'),
+    path('routines/<int:pk>/delete/', views.routine_delete, name='routine_delete'),
+
 ]
